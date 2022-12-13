@@ -1,3 +1,20 @@
+
+import oracledb
+import os
+import pandas as pd
+import openpyxl
+from pandas import DataFrame
+from dotenv import load_dotenv
+load_dotenv()
+user = os.environ.get('SQL_USER')
+password = os.environ.get('SQL_PASSWORD')
+host = os.environ.get('SQL_HOST')
+sid = os.environ.get('SQL_SID')
+
+
+
+
+sql="""
 SELECT
     DISTINCT
     COASIGNED.PRODUCT                                    AS "Product",
@@ -140,5 +157,14 @@ WHERE
     AND (QCSUBMITTED.COUNT > 0
     OR QCSUBMITTED.METHODS IS NULL)
 ORDER BY
-    COASIGNED.FIRST_VERSION DESC
+    COASIGNED.FIRST_VERSION DESC"""
 
+
+
+
+
+startdateinput =  input("enter the start date: ")
+with oracledb.connect(user=user, password=password, host=host, port=1521, sid=sid) as connection:
+	with connection.cursor() as cursor:
+		df = pd.DataFrame(cursor.execute(sql, startdate=startdateinput), columns=['Product','Batch','Methods','Customer','QC Sample In','Analytical Done','Micro Sample In','CoA Issued'])
+df.to_excel(startdateinput + ".xlsx", index=False)
